@@ -1,3 +1,4 @@
+package recipeClasses;
 
 public class Ingredient {
 	
