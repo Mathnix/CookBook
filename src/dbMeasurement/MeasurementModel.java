@@ -1,4 +1,4 @@
-package dbPreparation;
+package dbMeasurement;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -7,29 +7,29 @@ import java.sql.SQLException;
 
 import dbUtil.dbConnection;
 
-public class PreparationModel {
+public class MeasurementModel {
 	
-	public String getPrepDescriptionByID(int id) throws SQLException {
+	public int getMeasurementIDByName(String name) throws SQLException {
 
 		Connection conn = dbConnection.getConnection();
 		PreparedStatement pr = null;
 		ResultSet rs = null;
 
-		String description = new String();
+		int measurementId = -1; //How to do this r
 
-		String sql = "SELECT Description FROM PreparationStep WHERE PreparationStepID = ?";
+		String sql = "SELECT MeasurementID FROM Measurements WHERE Unit = ?";
 		try {
 			pr = conn.prepareStatement(sql);
-			pr.setInt(1, id);
+			pr.setString(1, name);
 
 			rs = pr.executeQuery();
-			while (rs.next()) {
-				description=rs.getString("Description");
+			if (rs.next()) {
+				measurementId = rs.getInt("MeasurementID");
 			}
 			conn.close();
-			return description;
+			return measurementId;
 		} catch (SQLException e) {
-			return description;
+			return measurementId;
 		} finally {
 			pr.close();
 			rs.close();
@@ -37,27 +37,27 @@ public class PreparationModel {
 		}
 	}
 	
-	public int getPrepStepNumberByID(int id) throws SQLException {
+	public String getMeasurementUnitNameByID(int id) throws SQLException {
 
 		Connection conn = dbConnection.getConnection();
 		PreparedStatement pr = null;
 		ResultSet rs = null;
 
-		int stepNumber = -1;
+		String measurementUnitName = new String();
 
-		String sql = "SELECT StepNumber FROM PreparationStep WHERE PreparationStepID = ?";
+		String sql = "SELECT Unit FROM Measurements WHERE MeasurementID = ?";
 		try {
 			pr = conn.prepareStatement(sql);
 			pr.setInt(1, id);
 
 			rs = pr.executeQuery();
 			while (rs.next()) {
-				stepNumber=rs.getInt("StepNumber");
+				measurementUnitName=rs.getString("Unit");
 			}
 			conn.close();
-			return stepNumber;
+			return measurementUnitName;
 		} catch (SQLException e) {
-			return stepNumber;
+			return measurementUnitName;
 		} finally {
 			pr.close();
 			rs.close();
