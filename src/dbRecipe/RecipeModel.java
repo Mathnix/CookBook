@@ -9,8 +9,20 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Handles all database action connected to the whole recipe.
+ * 
+ * @author lena
+ *
+ */
 public class RecipeModel {
 
+	/**
+	 * Get a list of all titles/names of recipes currently saved in the database.
+	 * 
+	 * @return A list of the titles of the recipes currently saved in the database
+	 * @throws SQLException
+	 */
 	public ArrayList<String> getAllRecipes() throws SQLException {
 
 		Connection conn = dbConnection.getConnection();
@@ -37,7 +49,14 @@ public class RecipeModel {
 			conn.close();
 		}
 	}
-	
+
+	/**
+	 * Get the title/name of one specific recipe by passing its ID.
+	 * 
+	 * @param id The database ID of the recipe.
+	 * @return The title/name of the recipe with the passed database ID.
+	 * @throws SQLException
+	 */
 	public String getRecipeNameByID(int id) throws SQLException {
 
 		Connection conn = dbConnection.getConnection();
@@ -65,13 +84,21 @@ public class RecipeModel {
 			conn.close();
 		}
 	}
-	
+
+	/**
+	 * Get the ID of a recipe by passing its ID.
+	 * 
+	 * @param title The title/name of the recipe.
+	 * @return The ID corresponding to the passed ID in the database.
+	 * @throws SQLException
+	 */
 	public int getRecipeIdByTitle(String title) throws SQLException {
 
 		Connection conn = dbConnection.getConnection();
 		PreparedStatement pr = null;
 		ResultSet rs = null;
 
+		// TODO: Better representation of invalid ID.
 		int recipeId = -1;
 
 		String sql = "SELECT RecipeId FROM Recipe WHERE Title = ?";
@@ -93,7 +120,15 @@ public class RecipeModel {
 			conn.close();
 		}
 	}
-	
+
+	/**
+	 * Get a list of all ingredients that are used in one recipe. To do so it querys
+	 * an in-between table "RecipeIngredient" that connects Ingredients and recipes.
+	 * 
+	 * @param id The ID of the recipe.
+	 * @return A list of all ingredients that are used in this recipe.
+	 * @throws SQLException
+	 */
 	public ArrayList<String> getAllIngredientsByRecipeId(int id) throws SQLException {
 
 		Connection conn = dbConnection.getConnection();
@@ -102,9 +137,9 @@ public class RecipeModel {
 
 		ArrayList<String> recipeIngredients = new ArrayList<String>();
 
-		String sql = "SELECT Ingredients.Name Name FROM Ingredients INNER JOIN"+
-					 "(SELECT RecipeIngredient.IngredientID id FROM RecipeIngredient WHERE RecipeId =?)res "+
-					 "ON Ingredients.IngredientId = res.id";
+		String sql = "SELECT Ingredients.Name Name FROM Ingredients INNER JOIN"
+				+ "(SELECT RecipeIngredient.IngredientID id FROM RecipeIngredient WHERE RecipeId =?)res "
+				+ "ON Ingredients.IngredientId = res.id";
 		try {
 			pr = conn.prepareStatement(sql);
 			pr.setInt(1, id);
@@ -123,27 +158,35 @@ public class RecipeModel {
 			conn.close();
 		}
 	}
-	
+
+	/**
+	 * Get all preparation steps that are performed in one recipe. They are
+	 * represented as key/value pairs via the step number and the description what
+	 * to do.
+	 * 
+	 * @param id The ID of the recipe.
+	 * @return All prepraration steps that need to be performes during the cooking
+	 *         process represented via HashMap (key/value pair)
+	 * @throws SQLException
+	 */
 	public HashMap<Integer, String> getAllPreparationStepsRecipeId(int id) throws SQLException {
 
 		Connection conn = dbConnection.getConnection();
 		PreparedStatement pr = null;
 		ResultSet rs = null;
-		
-		HashMap<Integer, String> recipePreparation = new HashMap<Integer,String>();
 
-		String sql = "SELECT PreparationStep.StepNumber StepNumber, PreparationStep.Description Description "+
-					 "FROM PreparationStep "+
-					 "INNER JOIN( SELECT RecipePreparation.RecipePreparationID id "+
-					 "FROM RecipePreparation WHERE RecipeId =?) res "+
-					 "ON PreparationStep.PreparationStepID = res.id";
+		HashMap<Integer, String> recipePreparation = new HashMap<Integer, String>();
+
+		String sql = "SELECT PreparationStep.StepNumber StepNumber, PreparationStep.Description Description "
+				+ "FROM PreparationStep " + "INNER JOIN( SELECT RecipePreparation.RecipePreparationID id "
+				+ "FROM RecipePreparation WHERE RecipeId =?) res " + "ON PreparationStep.PreparationStepID = res.id";
 		try {
 			pr = conn.prepareStatement(sql);
 			pr.setInt(1, id);
 
 			rs = pr.executeQuery();
 			while (rs.next()) {
-				recipePreparation.put(rs.getInt("StepNumber"),rs.getString("Description"));
+				recipePreparation.put(rs.getInt("StepNumber"), rs.getString("Description"));
 			}
 			conn.close();
 			return recipePreparation;
@@ -155,10 +198,9 @@ public class RecipeModel {
 			conn.close();
 		}
 	}
-	
-	
-	
-	
-	
+
+	// TODO: Delete Recipe -> Need to adjust References in in-between tables.
+	// TODO: Update/Change Recipe -> Need to adjust References in in-between tables.
+	// TODO: Insert whole Recipe -> needs update all in-between tables.
 
 }
