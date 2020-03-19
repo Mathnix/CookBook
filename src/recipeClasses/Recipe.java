@@ -213,7 +213,4 @@ public class Recipe {
 		this.listOfIngredients.add(ingredient);
 	}
 
-	// TODO: Add unique ingredients
-	// TODO: Find Ingredient/Preparation step -> could need comparison operator
-	// TODO: Delete Ingredient/Preparation step
 }

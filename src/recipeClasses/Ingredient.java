@@ -94,7 +94,4 @@ public class Ingredient {
 	public void setMeasure(String measure) {
 		this.measure = measure;
 	}
-
-	// TODO: Compararison between two Ingredients
-
 }

@@ -1,4 +1,4 @@
-package dbIngredients;
+package dbQuery;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,7 +8,8 @@ import java.sql.SQLException;
 import dbUtil.dbConnection;
 
 /**
- * Handles als database actions that affect the ingredients.
+ * Handles als database actions that affect the ingredients table. An ingredient
+ * is represented via its name as string.
  * 
  * 
  * @author lena
@@ -19,23 +20,23 @@ public class IngredientsModel {
 	/**
 	 * Get the database ID of an ingredient by passing the name.
 	 * 
-	 * @param name The name of the ingredient.
-	 * @return The ID in the database of this ingredient.
+	 * @param ingredientName The name of the ingredient.
+	 * @return The ID in the database of this ingredient as int or -1 if no
+	 *         ingredient was found.
 	 * @throws SQLException
 	 */
-	public int getIngredientIDByName(String name) throws SQLException {
+	public int getIngredientIDByName(String ingredientName) throws SQLException {
 
 		Connection conn = dbConnection.getConnection();
 		PreparedStatement pr = null;
 		ResultSet rs = null;
 
-		// TODO: Better representation of invalid ID
 		int ingredientId = -1;
 
 		String sql = "SELECT IngredientID FROM Ingredients WHERE name = ?";
 		try {
 			pr = conn.prepareStatement(sql);
-			pr.setString(1, name);
+			pr.setString(1, ingredientName);
 
 			rs = pr.executeQuery();
 			if (rs.next()) {
@@ -55,11 +56,12 @@ public class IngredientsModel {
 	/**
 	 * Get the name of an ingredient by passing its database ID.
 	 * 
-	 * @param id The ID of the ingredient used in the database.
-	 * @return The name of the ingredient.
+	 * @param ingredientID The ID of the ingredient used in the database.
+	 * @return The name of the ingredient as string or null if no ingredient was
+	 *         found.
 	 * @throws SQLException
 	 */
-	public String getIngredientNameByID(int id) throws SQLException {
+	public String getIngredientNameByID(int ingredientID) throws SQLException {
 
 		Connection conn = dbConnection.getConnection();
 		PreparedStatement pr = null;
@@ -70,7 +72,7 @@ public class IngredientsModel {
 		String sql = "SELECT Name FROM Ingredients WHERE IngredientID = ?";
 		try {
 			pr = conn.prepareStatement(sql);
-			pr.setInt(1, id);
+			pr.setInt(1, ingredientID);
 
 			rs = pr.executeQuery();
 			while (rs.next()) {
@@ -79,7 +81,7 @@ public class IngredientsModel {
 			conn.close();
 			return ingredientName;
 		} catch (SQLException e) {
-			return ingredientName;
+			return null;
 		} finally {
 			pr.close();
 			rs.close();
@@ -88,21 +90,18 @@ public class IngredientsModel {
 	}
 
 	/**
-	 * Insert a new ingredient in the database. This method returns the ID of the
-	 * newly inserted ingredient. If the ingredient is already in the database it
-	 * returns its ID.
+	 * Insert a new ingredient in the database.
 	 * 
-	 * @param name The name of the ingredient to insert.
-	 * @return The ID of the ingredient (newly inserted or already in database).
+	 * @param ingredientName The name of the ingredient to insert.
+	 * @return The ID of the ingredient (newly inserted or the corresponding ID if
+	 *         the element was already in the table) or -1 if the insertion failed.
 	 * @throws SQLException
 	 */
-	public int insertIngredient(String name) throws SQLException {
+	public int insertIngredient(String ingredientName) throws SQLException {
 
 		Connection conn = dbConnection.getConnection();
 		PreparedStatement pr = null;
 
-		// TODO: Better representation for invalid ID and the success of the SQL
-		// Statement.
 		int rs = -1;
 		int ingredientId = -1;
 
@@ -110,8 +109,8 @@ public class IngredientsModel {
 				+ "WHERE NOT EXISTS(SELECT * FROM Ingredients WHERE Name = ?)";
 		try {
 			pr = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-			pr.setString(1, name);
-			pr.setString(2, name);
+			pr.setString(1, ingredientName);
+			pr.setString(2, ingredientName);
 
 			rs = pr.executeUpdate();
 
@@ -126,9 +125,9 @@ public class IngredientsModel {
 
 			}
 
-			// Item already in Table
+			// Item already in table
 			if (rs == 0) {
-				ingredientId = getIngredientIDByName(name);
+				ingredientId = getIngredientIDByName(ingredientName);
 			}
 
 			conn.close();
@@ -140,8 +139,5 @@ public class IngredientsModel {
 			conn.close();
 		}
 	}
-
-	// TODO: Delete Ingredient -> Need to adjust References in in-between tables.
-	// TODO: Update/Change Ingredient -> Need to adjust References in in-between tables.
 
 }

@@ -1,4 +1,4 @@
-package dbImage;
+package dbQuery;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,8 +8,9 @@ import java.sql.SQLException;
 import dbUtil.dbConnection;
 
 /**
- * Handles all database actions that affect the image/picture of a recipe.
- * 
+ * Handles all database actions that affect the image/picture table of a recipe.
+ * The table contains the filename with extension for the picture that is part
+ * of the recipe. The filename is represented as string. *
  * 
  * @author lena
  *
@@ -20,7 +21,8 @@ public class ImageModel {
 	 * Get the database ID of an image by using its filename.
 	 * 
 	 * @param filename The filename of the image.
-	 * @return The databse ID of the image with corresponding filename.
+	 * @return The databse ID of the image with corresponding filename as int or -1
+	 *         if it is not found.
 	 * @throws SQLException
 	 */
 	public int getImageIDByFilename(String filename) throws SQLException {
@@ -29,7 +31,6 @@ public class ImageModel {
 		PreparedStatement pr = null;
 		ResultSet rs = null;
 
-		// TODO: Better representation of invalid ID
 		int imageId = -1;
 
 		String sql = "SELECT ImageID FROM Image WHERE Filename = ?";
@@ -55,11 +56,12 @@ public class ImageModel {
 	/**
 	 * Get the filname of the image by using its ID in the database.
 	 * 
-	 * @param id The ID of the image/filename in the database.
-	 * @return The image filename represented as string.
+	 * @param imageID The ID of the image/filename in the database.
+	 * @return The image filename represented as string or null if no image was
+	 *         found.
 	 * @throws SQLException
 	 */
-	public String getImageFilenameByID(int id) throws SQLException {
+	public String getImageFilenameByID(int imageID) throws SQLException {
 
 		Connection conn = dbConnection.getConnection();
 		PreparedStatement pr = null;
@@ -70,7 +72,7 @@ public class ImageModel {
 		String sql = "SELECT Filename FROM Image WHERE ImageID = ?";
 		try {
 			pr = conn.prepareStatement(sql);
-			pr.setInt(1, id);
+			pr.setInt(1, imageID);
 
 			rs = pr.executeQuery();
 			while (rs.next()) {
@@ -79,7 +81,7 @@ public class ImageModel {
 			conn.close();
 			return filename;
 		} catch (SQLException e) {
-			return filename;
+			return null;
 		} finally {
 			pr.close();
 			rs.close();
@@ -88,18 +90,19 @@ public class ImageModel {
 	}
 
 	/**
-	 * Insert a new image/filename in the database.
+	 * Insert a new image/filename in the database.filename.
 	 * 
 	 * @param filename The filename of the image to insert into the databse.
-	 * @return The ID of the inserted image.
+	 * @return The ID of the inserted image as int (newly inserted or the
+	 *         corresponding ID if the element was already in the table) or -1 if
+	 *         the insertion failed.
 	 * @throws SQLException
 	 */
 	public int insertImage(String filename) throws SQLException {
 
 		Connection conn = dbConnection.getConnection();
 		PreparedStatement pr = null;
-		
-		//TODO: Better representation for invalid ID and the success of the SQL Statement.
+
 		int rs = -1;
 		int imageId = -1;
 
@@ -123,7 +126,7 @@ public class ImageModel {
 
 			}
 
-			// Item already in Table
+			// Item already in table
 			if (rs == 0) {
 				imageId = getImageIDByFilename(filename);
 			}
@@ -137,8 +140,5 @@ public class ImageModel {
 			conn.close();
 		}
 	}
-
-	// TODO: Delete Image -> Need to adjust References in in-between tables.
-	// TODO: Update/Change Image -> Need to adjust References in in-between tables.
 
 }

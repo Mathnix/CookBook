@@ -1,4 +1,4 @@
-package dbMeasurement;
+package dbQuery;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,7 +8,11 @@ import java.sql.SQLException;
 import dbUtil.dbConnection;
 
 /**
- * Handles all database actions that affect the measurements.
+ * Handles all database actions that affect the measurements table. The
+ * measurement table contains all measurements used in a recipe as string.
+ * Examples for measurements would be "g", "kg", "l", "ml" but also "tbsp",
+ * "pcs". Since a measurement is saved as string you can set what ever
+ * measurement unit you want.
  * 
  * @author lena
  *
@@ -18,23 +22,24 @@ public class MeasurementModel {
 	/**
 	 * Get the ID of a measurement by passing its name.
 	 * 
-	 * @param name The name of the mearurement (for example tbsp., l, kg) as String.
-	 * @return The ID of the measurement in the database.
+	 * @param UnitName The name of the measurement (for example tbsp., l, kg) as
+	 *                 string.
+	 * @return The ID of the measurement in the database as int or -1 if no
+	 *         measurement was found.
 	 * @throws SQLException
 	 */
-	public int getMeasurementIDByName(String name) throws SQLException {
+	public int getMeasurementIDByName(String UnitName) throws SQLException {
 
 		Connection conn = dbConnection.getConnection();
 		PreparedStatement pr = null;
 		ResultSet rs = null;
 
-		// TODO: Better representation for invalid ID.
 		int measurementId = -1;
 
 		String sql = "SELECT MeasurementID FROM Measurements WHERE Unit = ?";
 		try {
 			pr = conn.prepareStatement(sql);
-			pr.setString(1, name);
+			pr.setString(1, UnitName);
 
 			rs = pr.executeQuery();
 			if (rs.next()) {
@@ -54,12 +59,12 @@ public class MeasurementModel {
 	/**
 	 * Get the name of a measurement unit by passing its database ID.
 	 * 
-	 * @param id The ID of the measurement in the database.
-	 * @return The name of the measurement unit that corresponds to the ID ind the
-	 *         database.
+	 * @param measurementID The ID of the measurement in the database.
+	 * @return The name of the measurement unit that corresponds to the ID in the
+	 *         database as string or null if no measurement was found.
 	 * @throws SQLException
 	 */
-	public String getMeasurementUnitNameByID(int id) throws SQLException {
+	public String getMeasurementUnitNameByID(int measurementID) throws SQLException {
 
 		Connection conn = dbConnection.getConnection();
 		PreparedStatement pr = null;
@@ -70,7 +75,7 @@ public class MeasurementModel {
 		String sql = "SELECT Unit FROM Measurements WHERE MeasurementID = ?";
 		try {
 			pr = conn.prepareStatement(sql);
-			pr.setInt(1, id);
+			pr.setInt(1, measurementID);
 
 			rs = pr.executeQuery();
 			while (rs.next()) {
@@ -79,7 +84,7 @@ public class MeasurementModel {
 			conn.close();
 			return measurementUnitName;
 		} catch (SQLException e) {
-			return measurementUnitName;
+			return null;
 		} finally {
 			pr.close();
 			rs.close();
@@ -91,17 +96,18 @@ public class MeasurementModel {
 	 * Insert a new measurement unit in the database by passing its name.
 	 * 
 	 * 
-	 * @param name The name of the measurement unit to insert. This could be for
-	 *             example tbsp., l, kg.
-	 * @return The ID of the measurement in the database.
+	 * @param UnitName The name of the measurement unit to insert. This could be for
+	 *                 example tbsp., l, kg.
+	 * @return The ID of the measurement in the database as int (newly inserted or
+	 *         the corresponding ID if the element was already in the table) or -1
+	 *         if the insertion failed.
 	 * @throws SQLException
 	 */
-	public int insertMeasurementUnit(String name) throws SQLException {
+	public int insertMeasurementUnit(String UnitName) throws SQLException {
 
 		Connection conn = dbConnection.getConnection();
 		PreparedStatement pr = null;
 
-		// TODO: Better representation of invalid ID and sucess of SQL statement.
 		int rs = -1;
 		int measurementId = -1;
 
@@ -109,8 +115,8 @@ public class MeasurementModel {
 				+ "WHERE NOT EXISTS(SELECT * FROM Measurements WHERE Unit = ?)";
 		try {
 			pr = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
-			pr.setString(1, name);
-			pr.setString(2, name);
+			pr.setString(1, UnitName);
+			pr.setString(2, UnitName);
 
 			rs = pr.executeUpdate();
 
@@ -125,9 +131,9 @@ public class MeasurementModel {
 
 			}
 
-			// Item already in Table
+			// Item already in table
 			if (rs == 0) {
-				measurementId = getMeasurementIDByName(name);
+				measurementId = getMeasurementIDByName(UnitName);
 			}
 
 			conn.close();
@@ -139,8 +145,5 @@ public class MeasurementModel {
 			conn.close();
 		}
 	}
-
-	// TODO: Delete Measurement -> Need to adjust References in in-between tables.
-	// TODO: Update/Change Measurement -> Need to adjust References in in-between tables.
 
 }

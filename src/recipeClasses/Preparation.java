@@ -92,6 +92,9 @@ public class Preparation {
 		preparation.put(numberOfStep, description);
 	}
 
-	// TODO: HashMap good idea?
-	// TODO: Unique insert?
+	public int getSize() {
+
+		return preparation.size();
+	}
+
 }

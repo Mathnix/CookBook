@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * Handles the connection the the database. In this case it ouses a sqlite File
+ * Handles the connection the the database. In this case it uses a sqlite file
  * with name "recipes".
  * 
  * @author lena
@@ -31,7 +31,4 @@ public class dbConnection {
 
 		return null;
 	}
-
-	// TODO: How save is this?
-	// TODO: Pass or create new database file in the beginning.
 }

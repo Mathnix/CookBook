@@ -1,7 +1,11 @@
 /dbIngredients/
-/recipeClasses/
+/dbQuery/
 /dbMeasurement/
-/dbImage/
 /dbPreparation/
 /dbRecipe/
+/RecipeImage/
+/RecipeIngredient/
+/RecipePreparation/
 /dbUtil/
+/recipeClasses/
+/Application.fxml
